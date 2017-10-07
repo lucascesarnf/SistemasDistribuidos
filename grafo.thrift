@@ -1,43 +1,13 @@
-
-include "shared.thrift"
-
 namespace java grafo
 
-typedef i32 MyInteger
 
-const i32 INT32CONSTANT = 9853
+exception ArestaNaoEncontrada
+{
 
-const map<string,string> MAPCONSTANT = {'hello':'world', 'goodnight':'moon'}
+}
+exception VerticeNaoEncontrado
+{
 
-enum Operation {
-  ADD = 1,
-  SUBTRACT = 2,
-  MULTIPLY = 3,
-  DIVIDE = 4
-}
-enum VerticeOP {
-    CREATE = 1,
-    READ = 2,
-    UPDATE = 3,
-    DELETE = 4,
-    LIST = 5
-}
-enum ArestaOP {
-    CREATE = 1,
-    READ = 2,
-    UPDATE = 3,
-    DELETE = 4,
-    LIST = 5
-}
-struct Work {
-  1: i32 num1 = 0,
-  2: i32 num2,
-  3: Operation op,
-  4: optional string comment,
-}
-exception InvalidOperation {
-  1: i32 whatOp,
-  2: string why
 }
 
 struct Vertice
@@ -47,6 +17,7 @@ struct Vertice
     3:string desc,
     4:double peso
 }
+
 struct Aresta
 {
     1:i32 v1,
@@ -55,32 +26,35 @@ struct Aresta
     4:string desc,
     5:i32 flag
 }
+
 struct Grafo
 {
     1:list<Vertice> v,
     2:list<Aresta> a
 }
 
-service Operacoes extends shared.SharedService {
 
-    void ping(),
+service Operacoes {
 
-    bool operacaoVertice(1:i32 logid, 2:Vertice v) throws (1:InvalidOperation ouch),
+        bool criarVertice (1:i32 nome,2:i32 cor, 3:double peso, 4:string desc),
+        bool criarAresta(1:i32 v1,2:i32 v2, 3:double peso, 4:i32 flag, 5:string desc),
 
-    bool operacaoAresta(1:i32 logid, 2:Aresta a) throws (1:InvalidOperation ouch),
+        bool removerVertice(1:i32 nome),
+        bool removerAresta(1:i32 v1,2:i32 v2),
 
-    oneway void zip()
+        bool updateVertice(1:Vertice v,2:i32 nome),
+        bool updateAresta(1:Aresta a,2:i32 v1,3:i32 v2),
 
-}
+        string verGrafo (),
 
-service Calculator extends shared.SharedService {
+        string listarVertices(),
+        string listarArestas(),
 
-   void ping(),
+        string listarArestasDoVertice(1:i32 name),
+        string listarVerticesDaAresta(1:i32 v1, 2:i32 v2),
+        string listarVisinhosDoVertice(1:i32 name),
 
-   i32 add(1:i32 num1, 2:i32 num2),
-
-   i32 calculate(1:i32 logid, 2:Work w) throws (1:InvalidOperation ouch),
-
-   oneway void zip()
+        Vertice getVertice(1:i32 name) throws (1:VerticeNaoEncontrado vne),
+        Aresta getAresta(1:i32 v1,2:i32 v2) throws (1:ArestaNaoEncontrada ane)
 
 }

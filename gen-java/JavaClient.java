@@ -1,25 +1,5 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
 
-// Generated code
-import tutorial.*;
-import shared.*;
+import grafo.*;
 
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TSSLTransportFactory;
@@ -30,46 +10,71 @@ import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TProtocol;
 
 public class JavaClient {
-  public static void main(String [] args) {
+      
+      public static void main(String [] args) {
+          try {
+              TTransport transport = new TSocket("localhost", 9090);
+              
+              transport.open();
+              
+              TProtocol protocol = new  TBinaryProtocol(transport);
+              Operacoes.Client client = new Operacoes.Client(protocol);
+              
+              System.out.println(client.verGrafo());
+              //System.out.println(client.listarVertices());
+              System.out.println(client.listarArestas());
+              Vertice v = client.getVertice(1);
+              //Cria Vertice :
+              int nome = 1;
+              int cor = 1;
+              double peso = 1.0;
+              String desc = "Vertice 1";
+              
+              
 
-    if (args.length != 1) {
-      System.out.println("Please enter 'simple' or 'secure'");
-      System.exit(0);
-    }
+              int nome2 = 2;
+              int cor2 = 2;
+              double peso2 = 2.0;
+              String desc2 = "Vertice 2";
 
-    try {
-      TTransport transport;
-      if (args[0].contains("simple")) {
-        transport = new TSocket("localhost", 9090);
-        transport.open();
+              int nome3 = 3;
+              int cor3 = 3;
+              double peso3 = 3.0;
+              String desc3 = "Vertice 3";
+
+              int nome4 = 4;
+              int cor4 = 4;
+              double peso4 = 4.0;
+              String desc4 = "Vertice 4";
+              
+              if (client.criarVertice(nome,cor,peso,desc)){
+                  System.out.println("\n\nTeste 1:\n");
+                  System.out.println(client.listarVertices());
+
+                  if (client.criarVertice(nome2,cor2,peso2,desc2)){
+                      System.out.println("\n\nTeste 2:\n");
+                      System.out.println(client.listarVertices());
+
+                      if (client.criarVertice(nome3,cor3,peso3,desc3)){
+                          System.out.println("\n\nTeste 3:\n");
+                          System.out.println(client.listarVertices());
+
+                      }
+                  }
+              }
+
+              System.out.println("Descrição do vertice: " + v.desc);
+         
+              transport.close();
+          } catch (TException x) {
+              x.printStackTrace();
+          }
       }
-      else {
-        /*
-         * Similar to the server, you can use the parameters to setup client parameters or
-         * use the default settings. On the client side, you will need a TrustStore which
-         * contains the trusted certificate along with the public key. 
-         * For this example it's a self-signed cert. 
-         */
-        TSSLTransportParameters params = new TSSLTransportParameters();
-        params.setTrustStore("../../lib/java/test/.truststore", "thrift", "SunX509", "JKS");
-        /*
-         * Get a client transport instead of a server transport. The connection is opened on
-         * invocation of the factory method, no need to specifically call open()
-         */
-        transport = TSSLTransportFactory.getClientSocket("localhost", 9091, 0, params);
-      }
-
-      TProtocol protocol = new  TBinaryProtocol(transport);
-      Calculator.Client client = new Calculator.Client(protocol);
-
-      perform(client);
-
-      transport.close();
-    } catch (TException x) {
-      x.printStackTrace();
-    } 
+      
+      
   }
-
+    /*
+ perform(client);
   private static void perform(Calculator.Client client) throws TException
   {
     client.ping();
@@ -104,3 +109,4 @@ public class JavaClient {
     System.out.println("Check log: " + log.value);
   }
 }
+*/

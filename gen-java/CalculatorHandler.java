@@ -29,7 +29,7 @@ public class CalculatorHandler implements Calculator.Iface {
 
   private HashMap<Integer,SharedStruct> log;
 
-  public CalculatorHandler() {
+  public CalculatorHandler(){
     log = new HashMap<Integer, SharedStruct>();
   }
 
