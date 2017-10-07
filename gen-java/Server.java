@@ -14,25 +14,37 @@ import Grafo.*;
 import java.util.HashMap;
 
 public class Server {
-
-  public static GrafoHandler grafo;
-
-  public static Operacoes.Processor processor;
-
-  public static void main(String [] args) {
-    try {
-      grafo = new GrafoHandler();
-      processor = new Operacoes.Processor(grafo);
-
-      TServerTransport serverTransport = new TServerSocket(9090);
-      TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
-
-      System.out.println("Starting the simple server...");
-      server.serve();
-
-    } catch (Exception x) 
-    {
-      x.printStackTrace();
+    
+    public static GrafoHandler grafo;
+    
+    public static Operacoes.Processor processor;
+    
+    public static void main(String [] args) {
+        if (args.length != 1) {
+            System.out.println("Por favor entre com um numero de porta \nExemplo: java Server 9090");
+            System.exit(0);
+        }
+        try {
+            
+            int port = Integer.parseInt(args[0]);
+            if(port > 0 && port < 65535){
+                
+                grafo = new GrafoHandler();
+                processor = new Operacoes.Processor(grafo);
+                
+                TServerTransport serverTransport = new TServerSocket(port);
+                TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
+                
+                System.out.println("Starting server...");
+                server.serve();
+                
+            }else{
+                System.out.println("Escolha uma porta válida, entre 0 e 65535");
+                System.exit(0);
+            }
+            
+        } catch (Exception x) {
+            x.printStackTrace();
+        }
     }
-  }
 }
