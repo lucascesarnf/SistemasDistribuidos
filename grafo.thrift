@@ -34,9 +34,11 @@ service Operacoes
 {
 	bool novoVertice (1:i32 nome,2:i32 cor, 3:double peso, 4:string descricao),
 	bool novaAresta(1:i32 v1,2:i32 v2, 3:double peso, 4:i32 flag, 5:string descricao),
-	bool removeVertice(1:i32 nome),
+
+    bool removeVertice(1:i32 nome),
 	bool removeAresta(1:i32 v1,2:i32 v2),
-	bool updateVertice(1:Vertice v,2:i32 nome),
+
+    bool updateVertice(1:Vertice v,2:i32 nome),
 	bool updateAresta(1:Aresta a,2:i32 v1,3:i32 v2),
 
 	string imprimeGrafo (),
