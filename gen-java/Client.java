@@ -215,7 +215,6 @@ public class Client {
                             System.out.println(" V1: " + a.getV1() + " V2: " + a.getV2() + " Flag: " + a.getFlag() + " Peso: " + a.getPeso() + " Descri??o: " + a.getDescricao() + "\n");
                             break;
                         case 15:
-                            System.out.println("14");
                             System.out.println("Desconectando...");
                             escolher = false;
                              return;

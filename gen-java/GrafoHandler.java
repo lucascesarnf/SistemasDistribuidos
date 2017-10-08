@@ -208,7 +208,7 @@ public class GrafoHandler implements Operacoes.Iface{
                 resultado = "VERTICES:\n";
                 for(Vertice aux : grafo.getVertices())
                 {
-                    resultado += " Nome: " + aux.getNome() + " Cor: " + aux.getCor() + " Peso: " + aux.getPeso() + " Descri??o: " + aux.getDescricao() + "\n";
+                    resultado += " Nome: " + aux.getNome() + " Cor: " + aux.getCor() + " Peso: " + aux.getPeso() + " Descricao: " + aux.getDescricao() + "\n";
                 }
             }
         }
@@ -226,7 +226,7 @@ public class GrafoHandler implements Operacoes.Iface{
                 resultado = "ARESTAS:\n";
                 for(Aresta aux : grafo.getArestas())
                 {
-                    resultado += " V1: " + aux.getV1() + " V2: " + aux.getV2() + " Flag: " + aux.getFlag() + " Peso: " + aux.getPeso() + " Descri??o: " + aux.getDescricao() + "\n";
+                    resultado += " V1: " + aux.getV1() + " V2: " + aux.getV2() + " Flag: " + aux.getFlag() + " Peso: " + aux.getPeso() + " Descricao: " + aux.getDescricao() + "\n";
                 }
             }
         }
@@ -245,7 +245,7 @@ public class GrafoHandler implements Operacoes.Iface{
                 for(Aresta aux : grafo.getArestas())
                 {
                     if(aux.getV1() == nome || aux.getV2() == nome)
-                        resultado += " V1: " + aux.getV1() + " V2: " + aux.getV2() + " Flag: " + aux.getFlag() + " Peso: " + aux.getPeso() + " Descri??o: " + aux.getDescricao() + "\n";
+                        resultado += " V1: " + aux.getV1() + " V2: " + aux.getV2() + " Flag: " + aux.getFlag() + " Peso: " + aux.getPeso() + " Descricao: " + aux.getDescricao() + "\n";
                 }
             }
         }
@@ -263,7 +263,7 @@ public class GrafoHandler implements Operacoes.Iface{
                 for(Vertice aux : grafo.getVertices())
                 {
                     if(aux.getNome() == v1 || aux.getNome() == v2)
-                        resultado += " Nome: " + aux.getNome() + " Cor: " + aux.getCor() + " Peso: " + aux.getPeso() + " Descri??o: " + aux.getDescricao() + "\n";
+                        resultado += " Nome: " + aux.getNome() + " Cor: " + aux.getCor() + " Peso: " + aux.getPeso() + " Descricao: " + aux.getDescricao() + "\n";
                 }
             }
         }
@@ -285,13 +285,13 @@ public class GrafoHandler implements Operacoes.Iface{
                     if(aux.getV1() == nome)
                     {
                         aux1 = retornaVertice(aux.getV2());
-                        resultado += " Nome: " + aux1.getNome() + " Cor: " + aux1.getCor() + " Peso: " + aux1.getPeso() + " Descri??o: " + aux1.getDescricao() + "\n";
+                        resultado += " Nome: " + aux1.getNome() + " Cor: " + aux1.getCor() + " Peso: " + aux1.getPeso() + " Descricaoo: " + aux1.getDescricao() + "\n";
                     }
                     // para o vertice 2 necessário verificar se a aresta é orientada (flag = 1), pois caso seja v1 nao é vizinho de v2
                     if(aux.getV2() == nome && aux.getFlag() == 0)
                     {
                         aux1 = retornaVertice(aux.getV1());
-                        resultado += " Nome: " + aux1.getNome() + " Cor: " + aux1.getCor() + " Peso: " + aux1.getPeso() + " Descri??o: " + aux1.getDescricao() + "\n";
+                        resultado += " Nome: " + aux1.getNome() + " Cor: " + aux1.getCor() + " Peso: " + aux1.getPeso() + " Descricao: " + aux1.getDescricao() + "\n";
                     }
                     
                 }
