@@ -62,6 +62,7 @@ public class Client {
                             System.out.println("Entre com um inteiro para Cor: ");
                             cor = scan.nextInt();
                             System.out.println("Escreva uma descrição: ");
+                            scan.nextLine();
                             descricao = scan.nextLine();
                             System.out.println("Entre com o peso do vertice:");
                             peso = scan.nextDouble();
@@ -124,6 +125,7 @@ public class Client {
                             System.out.println("Entre com um inteiro para nova Cor: ");
                             cor = scan.nextInt();
                             System.out.println("Escreva a nova descrição: ");
+                            scan.nextLine();
                             descricao = scan.nextLine();
                             System.out.println("Entre com o peso do novo vertice:");
                             peso = scan.nextDouble();
@@ -150,6 +152,7 @@ public class Client {
                             System.out.println("Entre com 1 para direcionado e 0 para não-direcionado: ");
                             cor = scan.nextInt();
                             System.out.println("Escreva a nova descrição: ");
+                            scan.nextLine();
                             descricao = scan.nextLine();
                             
                             Aresta aresta = new Aresta();
@@ -212,7 +215,7 @@ public class Client {
                             System.out.println("Entre com o inteiro do Nome do vertice 2 da aresta:");
                             v2 = scan.nextInt();
                             Aresta a = client.retornaAresta(v1,v2);
-                            System.out.println(" V1: " + a.getV1() + " V2: " + a.getV2() + " Flag: " + a.getFlag() + " Peso: " + a.getPeso() + " Descri??o: " + a.getDescricao() + "\n");
+                            System.out.println(" V1: " + a.getV1() + " V2: " + a.getV2() + " Flag: " + a.getFlag() + " Peso: " + a.getPeso() + " Descricao: " + a.getDescricao() + "\n");
                             break;
                         case 15:
                             System.out.println("Desconectando...");
