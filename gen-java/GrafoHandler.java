@@ -4,6 +4,11 @@ import org.apache.thrift.TException;
 import java.util.HashMap;
 import Grafo.*;
 import java.util.ArrayList;
+import java.security.MessageDigest;
+
+import java.util.*;
+
+import static java.lang.Math.abs;
 
 public class GrafoHandler implements Operacoes.Iface{
     
@@ -13,6 +18,7 @@ public class GrafoHandler implements Operacoes.Iface{
     @Override
     public boolean novoVertice(int nome,int cor, double peso, String descricao)
     {
+        
         
         synchronized(grafo.getVertices()) {
             
@@ -42,6 +48,21 @@ public class GrafoHandler implements Operacoes.Iface{
     @Override
     public boolean novaAresta(int v1,int v2, double peso, int flag, String descricao)
     {
+        //Chama a função que encontra o hash(v1,v2) -> 2000
+        //Chamo a função que encontra o responsável -> porta
+        /* if(this.porta == porta){
+        TTransport transport = new TSocket("localHost", porta);
+        transport.open();
+        
+        TProtocol protocol = new  TBinaryProtocol(transport);
+        Operacoes.Client client = new Operacoes.Client(protocol);
+        
+        
+        return (client.novaAresta(v1,v2,peso,flag,descricao));
+        
+         
+         1 2 4 8 16 32
+         */
         boolean existeVertice1 = false;
         boolean existeVertice2 = false;
         
@@ -337,4 +358,21 @@ public class GrafoHandler implements Operacoes.Iface{
         }
         return new Aresta();
     }
+    
+    private int findResponsible(int i) {
+        
+        byte[] theDigest = null;
+        
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            theDigest = md.digest( Integer.toString(i).getBytes("UTF-8") );
+        }
+        
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        
+        return abs(theDigest[theDigest.length-1] % this.clients.length);
+    }
+    
 }

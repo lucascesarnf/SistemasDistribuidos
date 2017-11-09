@@ -32,7 +32,7 @@ struct Grafo
 
 service Operacoes
 {
-	bool novoVertice (1:i32 nome,2:i32 cor, 3:double peso, 4:string descricao),
+    bool novoVertice (1:i32 nome,2:i32 cor, 3:double peso, 4:string descricao),
 	bool novaAresta(1:i32 v1,2:i32 v2, 3:double peso, 4:i32 flag, 5:string descricao),
 
     bool removeVertice(1:i32 nome),

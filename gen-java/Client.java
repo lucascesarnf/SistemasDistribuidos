@@ -15,9 +15,9 @@ public class Client {
             System.exit(0);
         }
         try {
-            
             int port = Integer.parseInt(args[1]);
             if(port > 0 && port < 65535){
+               
                 TTransport transport = new TSocket(args[0], port);
                 transport.open();
                 
