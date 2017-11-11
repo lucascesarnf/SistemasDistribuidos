@@ -30,8 +30,8 @@ public class Server {
             if(port > 0 && port < 65535){
                 
                 grafo = new GrafoHandler();
+                grafo.selfPorta = port;
                 processor = new Operacoes.Processor(grafo);
-                
                 TServerTransport serverTransport = new TServerSocket(port);
                 TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
                 

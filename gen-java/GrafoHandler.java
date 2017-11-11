@@ -1,6 +1,22 @@
 //package grafo;
-
 import org.apache.thrift.TException;
+import org.apache.thrift.transport.TSSLTransportFactory;
+import org.apache.thrift.transport.TTransport;
+import org.apache.thrift.transport.TSocket;
+import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
+import org.apache.thrift.protocol.TBinaryProtocol;
+import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.server.TServer;
+import org.apache.thrift.server.TServer.Args;
+import org.apache.thrift.server.TSimpleServer;
+import org.apache.thrift.server.TThreadPoolServer;
+import org.apache.thrift.transport.TSSLTransportFactory;
+import org.apache.thrift.transport.TServerSocket;
+import org.apache.thrift.transport.TServerTransport;
+import org.apache.thrift.transport.TSSLTransportFactory.TSSLTransportParameters;
+
+//###############################
+
 import java.util.HashMap;
 import Grafo.*;
 import java.util.ArrayList;
@@ -12,82 +28,152 @@ import static java.lang.Math.abs;
 
 public class GrafoHandler implements Operacoes.Iface{
     
+    private int[] clients = {9090, 8129, 9092, 8978, 9056};
+    
+    public int selfPorta;
+    
     private Grafo grafo = new Grafo(new ArrayList<Vertice>(), new ArrayList<Aresta>());
     
     //Adicionar Vertice a Lista Grafo.Vertices[]
     @Override
     public boolean novoVertice(int nome,int cor, double peso, String descricao)
     {
+        int index = findResponsible(nome);
+        int porta = clients[index];
+        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
         
-        
-        synchronized(grafo.getVertices()) {
+        if(selfPorta != porta){
+            System.out.println("Eu NÃO SOU o responsável");
             
-            if (grafo.getVertices() != null)
-            {
-                for(Vertice aux : grafo.getVertices())
+            TTransport transport = new TSocket("localHost",porta);
+            try{
+                transport.open();
+                TProtocol protocol = new  TBinaryProtocol(transport);
+                Operacoes.Client client = new Operacoes.Client(protocol);
+                System.out.println("Passei pra frente");
+                System.out.println(imprimeVertices());
+                System.out.println("Agora é esperar...");
+                boolean retorno = client.novoVertice(nome, cor, peso, descricao);
+                transport.close();
+                return retorno;
+            }catch (Exception x) {
+                x.printStackTrace();
+            }
+        }else{
+            System.out.println("Eu SOU o responsável");
+            synchronized(grafo.getVertices()) {
+                
+                if (grafo.getVertices() != null)
                 {
-                    if(aux.getNome() == nome)
+                    for(Vertice aux : grafo.getVertices())
                     {
-                        System.out.println("Vertice já existente");
-                        return false;
+                        if(aux.getNome() == nome)
+                        {
+                            System.out.println("Vertice já existente");
+                            return false;
+                        }
                     }
                 }
+                
+                Vertice vertice = new Vertice();
+                vertice.setNome(nome);
+                vertice.setCor(cor);
+                vertice.setPeso(peso);
+                vertice.setDescricao(descricao);
+                grafo.addToVertices(vertice);
             }
-            
-            Vertice vertice = new Vertice();
-            vertice.setNome(nome);
-            vertice.setCor(cor);
-            vertice.setPeso(peso);
-            vertice.setDescricao(descricao);
-            grafo.addToVertices(vertice);
+            System.out.println("Deu bom\n");
+            System.out.println(imprimeVertices());
+            return true;
         }
-        return true;
+        System.out.println("Deu ruim");
+        return false;
     }
     
     //Adicionar Aresta a Lista Grafo.Arestas[].
     @Override
     public boolean novaAresta(int v1,int v2, double peso, int flag, String descricao)
     {
-        //Chama a função que encontra o hash(v1,v2) -> 2000
-        //Chamo a função que encontra o responsável -> porta
-        /* if(this.porta == porta){
-        TTransport transport = new TSocket("localHost", porta);
-        transport.open();
+        if(v1 == v2){
+            return false;
+        }
         
-        TProtocol protocol = new  TBinaryProtocol(transport);
-        Operacoes.Client client = new Operacoes.Client(protocol);
+        int index = findResponsible(v1+v2);
+        int porta = clients[index];
+        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
         
-        
-        return (client.novaAresta(v1,v2,peso,flag,descricao));
-        
-         
-         1 2 4 8 16 32
-         */
-        boolean existeVertice1 = false;
-        boolean existeVertice2 = false;
-        
-        synchronized( grafo.getArestas()){
-            if ((grafo.getVertices() != null) && (v1 != v2))
-            {
-                synchronized(grafo.getVertices()){
-                    for(Vertice aux : grafo.getVertices())
-                    {
-                        if(aux.getNome() == v1)
-                        {
-                            existeVertice1 = true;
-                        }
-                        if(aux.getNome() == v2)
-                        {
-                            existeVertice2 = true;
-                        }
-                        if(existeVertice1 && existeVertice2)
-                            break;
-                        
-                    }
+        if(selfPorta != porta){
+            System.out.println("Eu NÃO SOU o responsável");
+            
+            TTransport transport = new TSocket("localHost",porta);
+            try{
+                transport.open();
+                TProtocol protocol = new  TBinaryProtocol(transport);
+                Operacoes.Client client = new Operacoes.Client(protocol);
+                System.out.println("Passei pra frente");
+                System.out.println(imprimeArestas());
+                System.out.println("Agora é esperar...");
+                System.out.println(imprimeArestas());
+                boolean retorno = client.novaAresta(v1,v2,peso,flag,descricao);
+                transport.close();
+                return retorno;
+            }catch (Exception x) {
+                x.printStackTrace();
+            }
+        }else{
+            System.out.println("Eu SOU o responsável");
+            
+            Vertice existeV1 = null;
+            Vertice existeV2 = null;
+            
+            // ----- V1 ------
+            int index1 = findResponsible(v1);
+            int porta1 = clients[index1];
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável por V1 é["+index1+"]:"+porta1);
+            if(selfPorta != porta1){
+                System.out.println("Eu NÃO SOU o responsável por V1");
+                
+                TTransport transport = new TSocket("localHost",porta1);
+                try{
+                    transport.open();
+                    TProtocol protocol = new  TBinaryProtocol(transport);
+                    Operacoes.Client client = new Operacoes.Client(protocol);
+                    System.out.println("Passei pra frente");
+                    System.out.println(imprimeArestas());
+                    existeV1 = client.retornaVertice(v1);
+                    System.out.println("Chegou pra mim: "+ existeV1);
+                    transport.close();
+                }catch (Exception x) {
+                    x.printStackTrace();
                 }
+            }else{
+                existeV1 = retornaVertice(v1);
+            }
+            // ----- V2 ------
+            int index2 = findResponsible(v2);
+            int porta2 = clients[index2];
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável por V2 é["+index2+"]:"+porta2);
+            if(selfPorta != porta2){
+                System.out.println("Eu NÃO SOU o responsável por V2");
+                
+                TTransport transport = new TSocket("localHost",porta2);
+                try{
+                    transport.open();
+                    TProtocol protocol = new  TBinaryProtocol(transport);
+                    Operacoes.Client client = new Operacoes.Client(protocol);
+                    System.out.println("Passei pra frente");
+                    System.out.println(imprimeArestas());
+                    existeV2 = client.retornaVertice(v2);
+                    System.out.println("Chegou pra mim: "+ existeV2);
+                    transport.close();
+                }catch (Exception x) {
+                    x.printStackTrace();
+                }
+            }else{
+                existeV2 = retornaVertice(v2);
             }
             // verificando se tanto o v1 quanto v2 existem para poder inserir a aresta
-            if(!existeVertice1 || !existeVertice2)
+            if(existeV2 == null || existeV1 == null)
                 return false;
             
             Aresta aresta = new Aresta();
@@ -98,9 +184,10 @@ public class GrafoHandler implements Operacoes.Iface{
             aresta.setDescricao(descricao);
             
             grafo.addToArestas(aresta);
-            
+            System.out.println(imprimeArestas());
+            return true;
         }
-        return true;
+        return false;
     }
     
     @Override
@@ -337,7 +424,7 @@ public class GrafoHandler implements Operacoes.Iface{
                 }
             }
         }
-        return new Vertice();
+        return null;
     }
     
     //retorna Aresta conforme vertices
@@ -356,7 +443,7 @@ public class GrafoHandler implements Operacoes.Iface{
                 }
             }
         }
-        return new Aresta();
+        return null;
     }
     
     private int findResponsible(int i) {
