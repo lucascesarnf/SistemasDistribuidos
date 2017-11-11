@@ -20,17 +20,21 @@ public class Server {
     public static Operacoes.Processor processor;
     
     public static void main(String [] args) {
+        
+        int[] clients = {9090, 8129, 9092, 8978, 9056};
+        
         if (args.length != 1) {
-            System.out.println("Por favor entre com um numero de porta \nExemplo: java Server 9090");
+            System.out.println("Por favor entre com um numero de identificação entre 0-4 para o servidor \nExemplo: java Server 0");
             System.exit(0);
         }
         try {
-            
-            int port = Integer.parseInt(args[0]);
-            if(port > 0 && port < 65535){
-                
+            int index = Integer.parseInt(args[0]);
+            int port = 0;
+            if(index >= 0 && index < 5){
+                port = clients[index];
                 grafo = new GrafoHandler();
                 grafo.selfPorta = port;
+                System.out.println("grafoHandler.porta = " + grafo.selfPorta);
                 processor = new Operacoes.Processor(grafo);
                 TServerTransport serverTransport = new TServerSocket(port);
                 TServer server = new TThreadPoolServer(new TThreadPoolServer.Args(serverTransport).processor(processor));
@@ -39,7 +43,7 @@ public class Server {
                 server.serve();
                 
             }else{
-                System.out.println("Escolha uma porta válida, entre 0 e 65535");
+                System.out.println("Escolha uma identificação válida, entre 0 e 4");
                 System.exit(0);
             }
             
