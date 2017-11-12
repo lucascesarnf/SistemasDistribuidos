@@ -83,7 +83,7 @@ public class GrafoHandler implements Operacoes.Iface{
                 grafo.addToVertices(vertice);
             }
             System.out.println("Deu bom\n");
-            System.out.println(imprimeVertices());
+            System.out.println("VERTICES:\n" + imprimeVertices());
             return true;
         }
         System.out.println("Deu ruim");
@@ -299,9 +299,10 @@ public class GrafoHandler implements Operacoes.Iface{
     {
         
         String resultado = "GRAFO:\n";
-        synchronized(grafo){
-            resultado = imprimeVertices() + imprimeArestas();
-        }
+        //synchronized(grafo){
+	    resultado +=  imprimeTodosArestas();
+            resultado +=  imprimeTodosVertices();
+        //}
         return resultado;
     }
     
@@ -313,7 +314,6 @@ public class GrafoHandler implements Operacoes.Iface{
         synchronized(grafo.getVertices()){
             if (grafo.getVertices() != null)
             {
-                resultado = "VERTICES:\n";
                 for(Vertice aux : grafo.getVertices())
                 {
                     resultado += " Nome: " + aux.getNome() + " Cor: " + aux.getCor() + " Peso: " + aux.getPeso() + " Descricao: " + aux.getDescricao() + "\n";
@@ -331,7 +331,6 @@ public class GrafoHandler implements Operacoes.Iface{
         synchronized(grafo.getArestas()){
             if (grafo.getArestas() != null)
             {
-                resultado = "ARESTAS:\n";
                 for(Aresta aux : grafo.getArestas())
                 {
                     resultado += " V1: " + aux.getV1() + " V2: " + aux.getV2() + " Flag: " + aux.getFlag() + " Peso: " + aux.getPeso() + " Descricao: " + aux.getDescricao() + "\n";
@@ -349,7 +348,6 @@ public class GrafoHandler implements Operacoes.Iface{
             
             if (grafo.getArestas() != null)
             {
-                resultado = "ARESTAS DO VERTICE:" + nome + "\n";
                 for(Aresta aux : grafo.getArestas())
                 {
                     if(aux.getV1() == nome || aux.getV2() == nome)
@@ -364,17 +362,22 @@ public class GrafoHandler implements Operacoes.Iface{
     public String imprimeVerticeAresta(int v1, int v2)
     {
         String resultado = "";
-        synchronized(grafo.getVertices()){
-            if (grafo.getVertices() != null)
-            {
-                resultado = "VERTICES DA ARESTA:(" + v1 + "," + v2 + ")\n";
-                for(Vertice aux : grafo.getVertices())
-                {
-                    if(aux.getNome() == v1 || aux.getNome() == v2)
-                        resultado += " Nome: " + aux.getNome() + " Cor: " + aux.getCor() + " Peso: " + aux.getPeso() + " Descricao: " + aux.getDescricao() + "\n";
-                }
-            }
+	Vertice vertice1 = retornaVertice(v1);
+	Vertice vertice2 = retornaVertice(v2);
+	Aresta arestaVerifica = retornaAresta(v1,v2);
+	if(arestaVerifica == null)
+	{
+		resultado = "Aresta não existe";
+		return resultado;
+	}
+
+        if (vertice1 != null && vertice2 != null)
+        {
+            resultado = "VERTICES DA ARESTA:(" + v1 + "," + v2 + ")\n";
+            resultado += " Nome: " + vertice1.getNome() + " Cor: " + vertice1.getCor() + " Peso: " + vertice1.getPeso() + " Descricao: " + vertice1.getDescricao() + "\n";
+            resultado += " Nome: " + vertice2.getNome() + " Cor: " + vertice2.getCor() + " Peso: " + vertice2.getPeso() + " Descricao: " + vertice2.getDescricao() + "\n";            
         }
+        
         return resultado;
         
     }
@@ -384,10 +387,11 @@ public class GrafoHandler implements Operacoes.Iface{
     {
         Vertice aux1;
         String resultado = "";
+	System.out.println("Imprimindo vizinhos no server de porta " + selfPorta);
         synchronized(grafo.getArestas()){
             if (grafo.getArestas() != null)
             {
-                resultado = "VIZINHOS DO VERTICE:" + nome + "\n";
+                
                 for(Aresta aux :  grafo.getArestas())
                 {
                     if(aux.getV1() == nome)
@@ -411,38 +415,89 @@ public class GrafoHandler implements Operacoes.Iface{
     //retorna Vertice conforme nome
     @Override
     public Vertice retornaVertice(int nome){
-        synchronized(grafo.getVertices()){
-            if (grafo.getVertices() != null)
-            {
-                for(Vertice aux : grafo.getVertices())
-                {
-                    if(aux.getNome() == nome)
-                    {
-                        return aux;
-                    }
-                    
-                }
+	Vertice retorno;
+	int index = findResponsible(nome);
+        int porta = clients[index];
+        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        
+        if(selfPorta != porta){
+            System.out.println("Eu NÃO SOU o responsável");
+            
+            TTransport transport = new TSocket("localHost",porta);
+            try{
+                transport.open();
+                TProtocol protocol = new  TBinaryProtocol(transport);
+                Operacoes.Client client = new Operacoes.Client(protocol);
+                System.out.println("Passei pra frente");
+                System.out.println(imprimeVertices());
+                System.out.println("Agora é esperar...");
+                retorno = client.retornaVertice(nome);
+                transport.close();
+                return retorno;
+            }catch (Exception x) {
+                x.printStackTrace();
             }
         }
+	else
+	{
+		System.out.println("Eu SOU o responsável");
+		synchronized(grafo.getVertices()){
+        	if (grafo.getVertices() != null)
+            	{
+                	for(Vertice aux : grafo.getVertices())
+                	{
+                	    if(aux.getNome() == nome)
+                	    {
+                	        return aux;
+                	    }    
+	                }
+        	 }
+          	 }
+	}
         return null;
     }
     
     //retorna Aresta conforme vertices
     @Override
     public Aresta retornaAresta(int v1,int v2){
-        synchronized(grafo.getArestas()){
-            if (grafo.getArestas() != null)
-            {
-                for(Aresta aux : grafo.getArestas())
-                {
-                    if((aux.getV1() == v1) && (aux.getV2() == v2))
-                    {
-                        return aux;
-                    }
-                    
-                }
+        Aresta retorno;
+	int index = findResponsible(v1+v2);
+        int porta = clients[index];
+        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        
+        if(selfPorta != porta){
+            System.out.println("Eu NÃO SOU o responsável");
+            
+            TTransport transport = new TSocket("localHost",porta);
+            try{
+                transport.open();
+                TProtocol protocol = new  TBinaryProtocol(transport);
+                Operacoes.Client client = new Operacoes.Client(protocol);
+                System.out.println("Passei pra frente");
+                System.out.println(imprimeVertices());
+                System.out.println("Agora é esperar...");
+                retorno = client.retornaAresta(v1,v2);
+                transport.close();
+                return retorno;
+            }catch (Exception x) {
+                x.printStackTrace();
             }
         }
+	else
+	{
+		synchronized(grafo.getArestas()){
+            	if (grafo.getArestas() != null)
+            	{
+                	for(Aresta aux : grafo.getArestas())
+                	{
+                   		if((aux.getV1() == v1) && (aux.getV2() == v2))
+		                {
+                        		return aux;
+                    		} 
+                	}
+            	}
+        	}
+	}
         return null;
     }
     
@@ -460,6 +515,136 @@ public class GrafoHandler implements Operacoes.Iface{
         }
         
         return abs(theDigest[theDigest.length-1] % this.clients.length);
+    }
+
+    @Override
+    public String imprimeTodosVertices()
+    {
+        String resultado = "VERTICES:\n";
+	TTransport transport;
+	TProtocol protocol;
+	Operacoes.Client client;
+	for(int i = 0; i<clients.length; i++)
+	{
+		System.out.println("Pegando registros do server " + clients[i]);
+		if(clients[i] == selfPorta)
+		{			
+			resultado += imprimeVertices();		
+		}
+		if(clients[i] != selfPorta)
+		{
+			transport = new TSocket("localHost",clients[i]);
+                	try{
+                    		transport.open();
+                    		protocol = new  TBinaryProtocol(transport);
+                    		client = new Operacoes.Client(protocol);
+	                        resultado += client.imprimeVertices();
+				System.out.println(client.imprimeVertices());
+            		        transport.close();
+            		}catch (Exception x) {
+                    		x.printStackTrace();
+                	}
+		}
+	}
+        return resultado;
+    }
+
+    @Override
+    public String imprimeTodosArestas()
+    {
+        String resultado = "ARESTAS:\n";
+	TTransport transport;
+	TProtocol protocol;
+	Operacoes.Client client;
+	for(int i = 0; i<clients.length; i++)
+	{
+		System.out.println("Pegando registros do server " + clients[i]);
+		if(clients[i] == selfPorta)
+		{			
+			resultado += imprimeArestas();		
+		}
+		if(clients[i] != selfPorta)
+		{
+			transport = new TSocket("localHost",clients[i]);
+                	try{
+                    		transport.open();
+                    		protocol = new  TBinaryProtocol(transport);
+                    		client = new Operacoes.Client(protocol);
+	                        resultado += client.imprimeArestas();
+				System.out.println(client.imprimeArestas());
+            		        transport.close();
+            		}catch (Exception x) {
+                    		x.printStackTrace();
+                	}
+		}
+	}
+        return resultado;
+    }
+
+    @Override
+    public String imprimeTodosVizinhos(int nome)
+    {
+	String resultado = "";
+	TTransport transport;
+	TProtocol protocol;
+	Operacoes.Client client;
+	resultado = "VIZINHOS DO VERTICE:" + nome + "\n";
+	for(int i = 0; i<clients.length; i++)
+	{
+		System.out.println("Pegando registros do server " + clients[i]);
+		if(clients[i] == selfPorta)
+		{			
+			resultado += imprimeVizinhos(nome);		
+		}
+		if(clients[i] != selfPorta)
+		{
+			transport = new TSocket("localHost",clients[i]);
+                	try{
+                    		transport.open();
+                    		protocol = new  TBinaryProtocol(transport);
+                    		client = new Operacoes.Client(protocol);
+	                        resultado += client.imprimeVizinhos(nome);
+				System.out.println(client.imprimeVertices());
+            		        transport.close();
+            		}catch (Exception x) {
+                    		x.printStackTrace();
+                	}
+		}
+	}
+        return resultado;
+    }
+
+    @Override
+    public String imprimeTodosArestaVertice(int nome)
+    {
+	String resultado = "";
+	TTransport transport;
+	TProtocol protocol;
+	Operacoes.Client client;
+	resultado = "IMPRIME ARESTAS DO VERTICE:" + nome + "\n";
+	for(int i = 0; i<clients.length; i++)
+	{
+		System.out.println("Pegando registros do server " + clients[i]);
+		if(clients[i] == selfPorta)
+		{			
+			resultado += imprimeArestaVertice(nome);		
+		}
+		if(clients[i] != selfPorta)
+		{
+			transport = new TSocket("localHost",clients[i]);
+                	try{
+                    		transport.open();
+                    		protocol = new  TBinaryProtocol(transport);
+                    		client = new Operacoes.Client(protocol);
+	                        resultado += client.imprimeArestaVertice(nome);
+				System.out.println(client.imprimeVertices());
+            		        transport.close();
+            		}catch (Exception x) {
+                    		x.printStackTrace();
+                	}
+		}
+	}
+        return resultado;
     }
     
 }

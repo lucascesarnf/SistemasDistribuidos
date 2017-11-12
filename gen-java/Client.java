@@ -46,7 +46,7 @@ public class Client {
                     System.out.println("##         9 - Imprimir Arestas        ##");
                     System.out.println("##  10 - Listar Arestas de um Vertice  ##");
                     System.out.println("##  11 - Listar Vertices de uma Aresta ##");
-                    System.out.println("##         12 - Listar Visinhos        ##");
+                    System.out.println("##         12 - Listar Vizinhos        ##");
                     System.out.println("##         13 - Pegar um Vertice       ##");
                     System.out.println("##         14 - Pegar uma Aresta       ##");
                     System.out.println("##         15 - Sair                   ##");
@@ -68,7 +68,7 @@ public class Client {
                             peso = scan.nextDouble();
                             if (client.novoVertice(v1, cor, peso, descricao)){
                                 System.out.println("Vertice inserido com sucesso!");
-                                System.out.println(client.imprimeVertices());
+                                System.out.println(client.imprimeTodosVertices());
                             } else {
                                 System.out.println("Erro inesperado!");
                             }
@@ -89,7 +89,7 @@ public class Client {
                             
                             if (client.novaAresta(v1, v2, peso, cor, descricao)){
                                 System.out.println("Aresta inserida com sucesso!");
-                                System.out.println(client.imprimeArestas());
+                                System.out.println(client.imprimeTodosArestas());
                             } else {
                                 System.out.println("Erro inesperado!");
                             }
@@ -136,7 +136,7 @@ public class Client {
                             vertice.setDescricao(descricao);
                             if (client.updateVertice(vertice,v1)){
                                 System.out.println("Vertice atualizado com sucesso!");
-                                System.out.println(client.imprimeVertices());
+                                System.out.println(client.imprimeTodosVertices());
                             } else {
                                 System.out.println("Erro inesperado!");
                             }
@@ -164,7 +164,7 @@ public class Client {
                             
                             if (client.updateAresta(aresta, v1, v2)){
                                 System.out.println("Aresta atualizada com sucesso!");
-                                System.out.println(client.imprimeArestas());
+                                System.out.println(client.imprimeTodosArestas());
                             }else{
                                 System.out.println("Erro inesperado!");
                             }
@@ -175,17 +175,17 @@ public class Client {
                             break;
                         case 8:
                             System.out.println("\n\nImprimir Vertices");
-                            System.out.println(client.imprimeVertices());
+                            System.out.println(client.imprimeTodosVertices());
                             break;
                         case 9:
                             System.out.println("\n\nImprimir Arestas");
-                            System.out.println(client.imprimeArestas());
+                            System.out.println(client.imprimeTodosArestas());
                             break;
                         case 10:
                             System.out.println("\n\nImprimir Arestas de um Vertice:");
                             System.out.println("Entre com o inteiro do Nome do vertice 1:");
                             v1 = scan.nextInt();
-                            System.out.println(client.imprimeArestaVertice(v1));
+                            System.out.println(client.imprimeTodosArestaVertice(v1));
                             break;
                         case 11:
                             System.out.println("\n\nImprimir Vertices de uma Aresta:");
@@ -196,16 +196,17 @@ public class Client {
                             System.out.println(client.imprimeVerticeAresta(v1,v2));
                             break;
                         case 12:
-                            System.out.println("\n\nImprimir visinhos de um Vertice:");
+                            System.out.println("\n\nImprimir vizinhos de um Vertice:");
                             System.out.println("Entre com o inteiro do Nome do vertice 1:");
                             v1 = scan.nextInt();
-                            System.out.println(client.imprimeVizinhos(v1));
+                            System.out.println(client.imprimeTodosVizinhos(v1));
                             break;
                         case 13:
                             System.out.println("\n\nPegar um Vertice:");
                             System.out.println("Entre com o inteiro do Nome do vertice :");
                             v1 = scan.nextInt();
                             Vertice vert = client.retornaVertice(v1);
+			    if(vert != null)
                             System.out.println(" Nome: " + vert.getNome() + " Cor: " + vert.getCor() + " Peso: " + vert.getPeso() + " Descricao: " + vert.getDescricao() + "\n");
                             break;
                         case 14:
@@ -215,6 +216,7 @@ public class Client {
                             System.out.println("Entre com o inteiro do Nome do vertice 2 da aresta:");
                             v2 = scan.nextInt();
                             Aresta a = client.retornaAresta(v1,v2);
+			    if(a != null)
                             System.out.println(" V1: " + a.getV1() + " V2: " + a.getV2() + " Flag: " + a.getFlag() + " Peso: " + a.getPeso() + " Descricao: " + a.getDescricao() + "\n");
                             break;
                         case 15:
