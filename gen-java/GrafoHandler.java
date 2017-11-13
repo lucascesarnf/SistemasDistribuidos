@@ -38,6 +38,7 @@ public class GrafoHandler implements Operacoes.Iface{
     @Override
     public boolean novoVertice(int nome,int cor, double peso, String descricao)
     {
+        System.out.println("############## Adicionar Vertice #################");
         int index = findResponsible(nome);
         int porta = clients[index];
         System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
@@ -55,6 +56,7 @@ public class GrafoHandler implements Operacoes.Iface{
                 System.out.println("Agora é esperar...");
                 boolean retorno = client.novoVertice(nome, cor, peso, descricao);
                 transport.close();
+                System.out.println("#############################################");
                 return retorno;
             }catch (Exception x) {
                 x.printStackTrace();
@@ -70,6 +72,7 @@ public class GrafoHandler implements Operacoes.Iface{
                         if(aux.getNome() == nome)
                         {
                             System.out.println("Vertice já existente");
+                            System.out.println("#############################################");
                             return false;
                         }
                     }
@@ -84,9 +87,11 @@ public class GrafoHandler implements Operacoes.Iface{
             }
             System.out.println("Deu bom\n");
             System.out.println(imprimeVertices());
+            System.out.println("#############################################");
             return true;
         }
         System.out.println("Deu ruim");
+        System.out.println("#############################################");
         return false;
     }
     
@@ -94,7 +99,9 @@ public class GrafoHandler implements Operacoes.Iface{
     @Override
     public boolean novaAresta(int v1,int v2, double peso, int flag, String descricao)
     {
+        System.out.println("############## Adicionar Aresta #################");
         if(v1 == v2){
+            System.out.println("#############################################");
             return false;
         }
         
@@ -113,9 +120,10 @@ public class GrafoHandler implements Operacoes.Iface{
                 System.out.println("Passei pra frente");
                 System.out.println(imprimeArestas());
                 System.out.println("Agora é esperar...");
-                System.out.println(imprimeArestas());
                 boolean retorno = client.novaAresta(v1,v2,peso,flag,descricao);
+                System.out.println(imprimeArestas());
                 transport.close();
+                System.out.println("#############################################");
                 return retorno;
             }catch (Exception x) {
                 x.printStackTrace();
@@ -173,8 +181,11 @@ public class GrafoHandler implements Operacoes.Iface{
                 existeV2 = retornaVertice(v2);
             }
             // verificando se tanto o v1 quanto v2 existem para poder inserir a aresta
-            if(existeV2 == null || existeV1 == null)
+            if(existeV2 == null || existeV1 == null){
+                System.out.println("#############################################");
                 return false;
+                
+            }
             
             Aresta aresta = new Aresta();
             aresta.setV1(v1);
@@ -184,16 +195,19 @@ public class GrafoHandler implements Operacoes.Iface{
             aresta.setDescricao(descricao);
             
             grafo.addToArestas(aresta);
+            System.out.println("Eu sou o ["+selfPorta+"] adicionei a aresta:["+v1+"]["+v2+"]");
             System.out.println(imprimeArestas());
+            System.out.println("#############################################");
             return true;
         }
+        System.out.println("#############################################");
         return false;
     }
     
     @Override
     public boolean removeVertice(int nome)
     {
-        
+        System.out.println("############## Remove Vertice #################");
         synchronized(grafo.getVertices()){
             if (grafo.getVertices() != null)
             {
@@ -211,59 +225,121 @@ public class GrafoHandler implements Operacoes.Iface{
                                     if(aux2.getV1() == nome || aux2.getV2() == nome)
                                     {
                                         grafo.getArestas().remove(aux2);
+                                        System.out.println("#############################################");
                                         return true;
                                     }
                                 }
                             }
                         }
+                        System.out.println("#############################################");
                         return true;
                     }
                 }
             }
         }
+        System.out.println("#############################################");
         return false;
     }
     
     @Override
     public boolean removeAresta(int v1,int v2)
     {
-        synchronized(grafo.getArestas()){
-            
-            if (grafo.getArestas() != null)
-            {
-                for(Aresta aux : grafo.getArestas())
+        System.out.println("############## Remove Aresta #################");
+        int index = findResponsible(v1+v2);
+        int porta = clients[index];
+        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        
+        if(selfPorta != porta){
+            System.out.println("Eu NÃO SOU o responsável");
+            TTransport transport = new TSocket("localHost",porta);
+            try{
+                transport.open();
+                TProtocol protocol = new  TBinaryProtocol(transport);
+                Operacoes.Client client = new Operacoes.Client(protocol);
+                System.out.println("Passei pra frente");
+                System.out.println(imprimeArestas());
+                System.out.println("Agora é esperar...");
+                boolean retorno = client.removeAresta(v1,v2);
+                transport.close();
+                System.out.println("#############################################");
+                return retorno;
+            }catch (Exception x) {
+                x.printStackTrace();
+            }
+        }else{
+            System.out.println("Eu SOU o responsável");
+            synchronized(grafo.getArestas()){
+                
+                if (grafo.getArestas() != null)
                 {
-                    if((aux.getV1() == v1 && aux.getV2() == v2) || (aux.getV1() == v2 && aux.getV2() == v1))
+                    for(Aresta aux : grafo.getArestas())
                     {
-                        grafo.getArestas().remove(aux);
-                        return true;
+                        if((aux.getV1() == v1 && aux.getV2() == v2) || (aux.getV1() == v2 && aux.getV2() == v1))
+                        {
+                            grafo.getArestas().remove(aux);
+                            System.out.println("#############################################");
+                            return true;
+                        }
                     }
                 }
+                System.out.println(imprimeArestas());
             }
         }
+        System.out.println("#############################################");
         return false;
+        
     }
     
     @Override
     public boolean updateVertice(Vertice v,int nome)
     {
-        int i = 0;
-        synchronized(grafo.getVertices()){
-            if (grafo.getVertices() != null)
-            {
-                for(Vertice aux : grafo.getVertices())
+        System.out.println("############## Update Vertice #################");
+        int index = findResponsible(nome);
+        int porta = clients[index];
+        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        
+        if(selfPorta != porta){
+            System.out.println("Eu NÃO SOU o responsável");
+            
+            TTransport transport = new TSocket("localHost",porta);
+            try{
+                transport.open();
+                TProtocol protocol = new  TBinaryProtocol(transport);
+                Operacoes.Client client = new Operacoes.Client(protocol);
+                System.out.println("Passei pra frente");
+                System.out.println(imprimeVertices());
+                System.out.println("Agora é esperar...");
+                boolean retorno = client.updateVertice(v,nome);
+                transport.close();
+                System.out.println("#############################################");
+                return retorno;
+            }catch (Exception x) {
+                x.printStackTrace();
+            }
+        }else{
+            System.out.println("Eu SOU o responsável");
+            int i = 0;
+            synchronized(grafo.getVertices()){
+                if (grafo.getVertices() != null)
                 {
-                    if(aux.getNome() == nome)
+                    for(Vertice aux : grafo.getVertices())
                     {
-                        grafo.getVertices().get(i).setPeso(v.getPeso());
-                        grafo.getVertices().get(i).setCor(v.getCor());
-                        grafo.getVertices().get(i).setDescricao(v.getDescricao());
-                        return true;
+                        if(aux.getNome() == nome)
+                        {
+                            grafo.getVertices().get(i).setPeso(v.getPeso());
+                            grafo.getVertices().get(i).setCor(v.getCor());
+                            grafo.getVertices().get(i).setDescricao(v.getDescricao());
+                            System.out.println(imprimeVertices());
+                            System.out.println("#############################################");
+                            return true;
+                        }
+                        i++;
                     }
-                    i++;
                 }
+                System.out.println(imprimeVertices());
             }
         }
+        System.out.println("#############################################");
         return false;
     }
     
@@ -271,24 +347,53 @@ public class GrafoHandler implements Operacoes.Iface{
     @Override
     public boolean updateAresta(Aresta a,int v1,int v2)
     {
-        int i = 0;
-        synchronized(grafo.getArestas()){
-            
-            if (grafo.getArestas() != null)
-            {
-                for(Aresta aux : grafo.getArestas())
+        System.out.println("############## Update Aresta #################");
+        int index = findResponsible(v1+v2);
+        int porta = clients[index];
+        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        
+        if(selfPorta != porta){
+            System.out.println("Eu NÃO SOU o responsável");
+            TTransport transport = new TSocket("localHost",porta);
+            try{
+                transport.open();
+                TProtocol protocol = new  TBinaryProtocol(transport);
+                Operacoes.Client client = new Operacoes.Client(protocol);
+                System.out.println("Passei pra frente");
+                System.out.println(imprimeArestas());
+                System.out.println("Agora é esperar...");
+                boolean retorno = client.updateAresta(a,v1,v2);
+                transport.close();
+                System.out.println("#############################################");
+                return retorno;
+            }catch (Exception x) {
+                x.printStackTrace();
+            }
+        }else{
+            System.out.println("Eu SOU o responsável");
+            int i = 0;
+            synchronized(grafo.getArestas()){
+                
+                if (grafo.getArestas() != null)
                 {
-                    if(aux.getV1() == v1 && aux.getV2() == v2)
+                    for(Aresta aux : grafo.getArestas())
                     {
-                        grafo.getArestas().get(i).setPeso(a.getPeso());
-                        grafo.getArestas().get(i).setFlag(a.getFlag());
-                        grafo.getArestas().get(i).setDescricao(a.getDescricao());
-                        return true;
+                        if(aux.getV1() == v1 && aux.getV2() == v2)
+                        {
+                            grafo.getArestas().get(i).setPeso(a.getPeso());
+                            grafo.getArestas().get(i).setFlag(a.getFlag());
+                            grafo.getArestas().get(i).setDescricao(a.getDescricao());
+                            System.out.println(imprimeVertices());
+                            System.out.println("#############################################");
+                            return true;
+                        }
+                        i++;
                     }
-                    i++;
                 }
+                System.out.println(imprimeArestas());
             }
         }
+        System.out.println("#############################################");
         return false;
     }
     
@@ -447,19 +552,21 @@ public class GrafoHandler implements Operacoes.Iface{
     }
     
     private int findResponsible(int i) {
-        
+        System.out.println("********** Encontrar Responsável **********");
         byte[] theDigest = null;
-        
+        System.out.println("Encontrar responsável para:"+ i);
         try{
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             theDigest = md.digest( Integer.toString(i).getBytes("UTF-8") );
-        }
-        
-        catch(Exception e){
+        }catch(Exception e){
             e.printStackTrace();
         }
+        int responsavel = abs(theDigest[theDigest.length-1] % this.clients.length);
         
-        return abs(theDigest[theDigest.length-1] % this.clients.length);
+        System.out.println("O responsável é:"+ responsavel);
+        
+        System.out.println("********************************************");
+        return responsavel;
     }
     
 }
