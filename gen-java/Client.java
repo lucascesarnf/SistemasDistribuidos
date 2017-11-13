@@ -10,17 +10,20 @@ import org.apache.thrift.protocol.TProtocol;
 
 public class Client {
     public static void main(String [] args) {
-        if (args.length != 2) {
-            System.out.println("Por favor entre com um host e um numero de porta \nExemplo: java Client localhost 9090");
+        
+        int[] clients = {9090, 8129, 9092, 8978, 9056};
+        
+        if (args.length != 1) {
+            System.out.println("Por favor entre com um numero de identificação de servidor entre 0-4 para seu client conectar\nExemplo: java Client 0");
             System.exit(0);
         }
         try {
-            int port = Integer.parseInt(args[1]);
-            if(port > 0 && port < 65535){
-               
-                TTransport transport = new TSocket(args[0], port);
+            int index = Integer.parseInt(args[0]);
+            int port = 0;
+            if(index >= 0 && index < 5){
+                port = clients[index];
+                TTransport transport = new TSocket("localhost", port);
                 transport.open();
-                
                 TProtocol protocol = new  TBinaryProtocol(transport);
                 Operacoes.Client client = new Operacoes.Client(protocol);
                 //Variáveis auxiliares:
@@ -111,7 +114,7 @@ public class Client {
                             v1 = scan.nextInt();
                             System.out.println("Entre com o inteiro do Nome do vertice2:");
                             v2 = scan.nextInt();
-                            if (client.removeAresta(v1,v1)){
+                            if (client.removeAresta(v1,v2)){
                                 System.out.println("Arestas Removido com sucesso!");
                                 System.out.println(client.imprimeGrafo());
                             } else {
