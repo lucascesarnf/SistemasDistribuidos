@@ -53,6 +53,8 @@ service Operacoes
 	string imprimeVizinhos(1:i32 nome),
 	string imprimeTodosVizinhos(1:i32 nome),
 
+    bool procuraArestaPerdida(1:i32 nome),
+
 	Vertice retornaVertice(1:i32 nome),
 	Aresta  retornaAresta(1:i32 v1, 2:i32 v2)
  }
