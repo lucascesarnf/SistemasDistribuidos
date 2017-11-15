@@ -52,7 +52,8 @@ public class Client {
                     System.out.println("##         12 - Listar Vizinhos        ##");
                     System.out.println("##         13 - Pegar um Vertice       ##");
                     System.out.println("##         14 - Pegar uma Aresta       ##");
-                    System.out.println("##         15 - Sair                   ##");
+                    System.out.println("##         15 - Menor Caminho          ##");
+                    System.out.println("##         16 - Sair                   ##");
                     System.out.println("#########################################");
                     
                     menu = scan.nextInt();
@@ -223,6 +224,13 @@ public class Client {
                             System.out.println(" V1: " + a.getV1() + " V2: " + a.getV2() + " Flag: " + a.getFlag() + " Peso: " + a.getPeso() + " Descricao: " + a.getDescricao() + "\n");
                             break;
                         case 15:
+                            System.out.println("Entre com o inteiro do Nome do vertice inicial:");
+                            v1 = scan.nextInt();
+                            System.out.println("Entre com o inteiro do Nome do vertice final:");
+                            v2 = scan.nextInt();
+			    System.out.println(client.menorCaminho(v1,v2));
+                            break;
+                        case 16:
                             System.out.println("Desconectando...");
                             escolher = false;
                              return;

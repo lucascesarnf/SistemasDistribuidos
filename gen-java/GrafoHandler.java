@@ -808,4 +808,129 @@ public class GrafoHandler implements Operacoes.Iface{
             return false;
         }
     }
+
+    @Override
+    public String menorCaminho(int inicio, int fim)
+    {
+	String resultado = "";
+	if(retornaVertice(inicio) == null)
+	{
+		resultado = "Vertice " + inicio + " não existe";
+		return resultado;	
+	}
+	if(retornaVertice(fim) == null)
+	{
+		resultado = "Vertice " + fim + " não existe";
+		return resultado;	
+	}
+	final HashMap<Integer, Double> distancias = new HashMap<>();
+        final HashMap<Integer, Integer> parentes = new HashMap<>();
+        final PriorityQueue<Integer> proximo = new PriorityQueue<>();
+        double distancia;
+        int atual;
+	Aresta aux;
+
+	proximo.add(inicio);
+        distancias.put(inicio, 0.0);
+
+        while (!proximo.isEmpty()) 
+	{
+            atual = proximo.poll();
+
+            for (Vertice vizinho : retornarVizinhosVertice(atual)) 
+	    {
+                aux = retornaAresta(atual, vizinho.getNome());
+
+                if (aux != null) 
+		{
+                    distancia = distancias.getOrDefault(atual, Double.POSITIVE_INFINITY);
+                    distancia += aux.getPeso();
+
+                    if (distancia < distancias.getOrDefault(vizinho.getNome(), Double.POSITIVE_INFINITY)) 			    {
+                        proximo.add( vizinho.getNome() );
+                        distancias.put(vizinho.getNome(), distancia);
+                        parentes.put(vizinho.getNome(), atual);
+                    }
+                }
+            }
+        }
+
+        /*if ( !parentes.containsKey(fim) )
+            return String.format("Não existe caminho entre %d e %d", inicio, fim);*/
+
+        LinkedList<Integer> caminho = new LinkedList<>();
+
+        for (atual = fim; atual != inicio; atual = parentes.get(atual))
+            caminho.addFirst(atual);
+        caminho.addFirst(inicio);
+
+	resultado = caminho.toString();
+	return resultado;
+
+
+    }
+
+    @Override
+    public List<Vertice> retornarizinhosVerticeServer(int nome)
+    {
+        Vertice aux1;
+        ArrayList<Vertice> resultado = new ArrayList<>();
+        System.out.println("Pegando vizinhos no server de porta " + selfPorta);
+        synchronized(grafo.getArestas()){
+            if (grafo.getArestas() != null)
+            {
+                
+                for(Aresta aux :  grafo.getArestas())
+                {
+                    if(aux.getV1() == nome)
+                    {
+                        aux1 = retornaVertice(aux.getV2());
+                        resultado.add(aux1);
+                    }
+                    // para o vertice 2 necessário verificar se a aresta é orientada (flag = 1), pois caso seja v1 nao é vizinho de v2
+                    if(aux.getV2() == nome && aux.getFlag() == 0)
+                    {
+                        aux1 = retornaVertice(aux.getV1());
+                        resultado.add(aux1);
+                    }
+                    
+                }
+            }
+        }
+        return resultado;
+    }
+
+    @Override
+    public List<Vertice> retornarVizinhosVertice(int nome)
+    {
+        ArrayList<Vertice> resultado = new ArrayList<>();
+        TTransport transport;
+        TProtocol protocol;
+        Operacoes.Client client;
+        for(int i = 0; i<clients.length; i++)
+        {
+            System.out.println("Pegando registros do server " + clients[i]);
+            if(clients[i] == selfPorta)
+            {
+		if(!retornarizinhosVerticeServer(nome).isEmpty())
+                	resultado.addAll(retornarizinhosVerticeServer(nome));
+            }
+            if(clients[i] != selfPorta)
+            {
+                transport = new TSocket("localHost",clients[i]);
+                try{
+                    transport.open();
+                    protocol = new  TBinaryProtocol(transport);
+                    client = new Operacoes.Client(protocol);
+		    if(!client.retornarizinhosVerticeServer(nome).isEmpty())
+                    	resultado.addAll(client.retornarizinhosVerticeServer(nome));
+                    System.out.println(client.imprimeVertices());
+                    transport.close();
+                }catch (Exception x) {
+                    x.printStackTrace();
+                }
+            }
+        }
+        return resultado;
+    }
 }

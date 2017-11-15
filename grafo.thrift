@@ -56,5 +56,8 @@ service Operacoes
     bool procuraArestaPerdida(1:i32 nome),
 
 	Vertice retornaVertice(1:i32 nome),
-	Aresta  retornaAresta(1:i32 v1, 2:i32 v2)
+	Aresta  retornaAresta(1:i32 v1, 2:i32 v2),
+	list<Vertice> retornarVizinhosVertice(1:i32 nome),
+	list<Vertice> retornarizinhosVerticeServer(1:i32 nome),
+	string menorCaminho(1:i32 inicio, 2:i32 fim)
  }
