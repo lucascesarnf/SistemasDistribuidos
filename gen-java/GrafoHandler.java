@@ -31,6 +31,9 @@ public class GrafoHandler implements Operacoes.Iface{
     private int[] clients = {9090, 8129, 9092, 8978, 9056};
     
     public int selfPorta;
+    public int selfIndex;//Para fins de controle do arquivo de configuração
+    public int selfNo;
+    public int[][] FT;
     
     private Grafo grafo = new Grafo(new ArrayList<Vertice>(), new ArrayList<Aresta>());
     
