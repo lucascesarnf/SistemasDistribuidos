@@ -32,6 +32,9 @@ struct Grafo
 
 service Operacoes
 {
+	
+	
+
     bool novoVertice (1:i32 nome,2:i32 cor, 3:double peso, 4:string descricao),
 	bool novaAresta(1:i32 v1,2:i32 v2, 3:double peso, 4:i32 flag, 5:string descricao),
 
@@ -59,5 +62,7 @@ service Operacoes
 	Aresta  retornaAresta(1:i32 v1, 2:i32 v2),
 	list<Vertice> retornarVizinhosVertice(1:i32 nome),
 	list<Vertice> retornarizinhosVerticeServer(1:i32 nome),
-	string menorCaminho(1:i32 inicio, 2:i32 fim)
+	string menorCaminho(1:i32 inicio, 2:i32 fim),
+
+	bool setaResponsavel(1:i32 souResponsavel)
  }

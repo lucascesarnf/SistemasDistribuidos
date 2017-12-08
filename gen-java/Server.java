@@ -31,37 +31,55 @@ public class Server {
     }
     
     public static int[][] generateFT(int mySelf){
-        
-        Properties prop = getProp();
-        String porta;
-        String p;
-        
-        int mBits = Integer.parseInt(prop.getProperty("mBits"));
-        int numberOfServers = Integer.parseInt(prop.getProperty("numberOfServers"));
-        
-        int[][] ft = new int[mBits][2];
-        int[][] servers = new int[numberOfServers][2];
-        
-        
-        //Carrega todos os servidores da rede para montar a finger table
-        for(int i = 0; i < servers.length ; i++){
-            porta = prop.getProperty("server." + i+".port");
-            p = prop.getProperty("server." + i+".k");
-            servers[i][0] = Integer.parseInt(p);
-            servers[i][1] = Integer.parseInt(porta);
-        }
-        
-        //Monta a FingerTable
-        for(int i = 0; i < ft.length ; i++){
-          int succ = mySelf + Math.pow(2,i-1)
-            for(int i = 0; i < servers.length - 1 ; i++){
-                if(servers[i][0] <= succ && succ <=servers[i+1][0]){
-                      ft[i][0] = servers[i+1][0]
-                      ft[i][1] = servers[i+1][1]
+            int[][] ft;
+        try{
+            Properties prop = getProp();
+            String porta;
+            String p;
+            
+            int mBits = Integer.parseInt(prop.getProperty("mBits"));
+            int numberOfServers = Integer.parseInt(prop.getProperty("numberOfServers"));
+            
+            ft = new int[mBits][2]; 
+            int[][] servers = new int[numberOfServers][2];
+            
+            
+            //Carrega todos os servidores da rede para montar a finger table
+            for(int i = 0; i < servers.length ; i++){
+                porta = prop.getProperty("server." + i+".port");
+                p = prop.getProperty("server." + i+".p");
+                servers[i][0] = Integer.parseInt(p);
+                servers[i][1] = Integer.parseInt(porta);
+            }
+            
+            //Monta a FingerTable
+            boolean passou = false;
+            for(int i = 0; i < ft.length ; i++){
+              double succ = mySelf + Math.pow(2,i);
+              succ = succ % Math.pow(2,mBits);
+              passou = false;
+                for(int j = 0; j < servers.length - 1 ; j++){
+
+
+                    if(servers[j][0] <= succ && succ <=servers[j+1][0]){
+                          ft[i][0] = servers[j+1][0];
+                          ft[i][1] = servers[j+1][1];
+                          j = servers.length;
+                          passou = true;
+                    }
+                }
+                if(!passou){
+                    ft[i][0] = servers[0][0];
+                          ft[i][1] = servers[0][1];
                 }
             }
+
+        return ft;
         }
-        //Ftp[i]=succ(p+2 i -1)
+        catch(Exception e){
+            e.printStackTrace();    
+        }
+        return  new int[5][2];
     }
     
     public static GrafoHandler grafo;
@@ -80,6 +98,8 @@ public class Server {
             Properties prop = getProp();
             String porta;
             String p;
+            
+            int mBits = Integer.parseInt(prop.getProperty("mBits"));
             int index = Integer.parseInt(args[0]);
             porta = prop.getProperty("server."+index+".port");
             p = prop.getProperty("server."+index+".p");
@@ -90,7 +110,9 @@ public class Server {
             grafo.selfPorta = port;
             grafo.selfIndex = index;
             grafo.selfNo = Integer.parseInt(p);
-            
+            grafo.ft = generateFT(grafo.selfNo);
+            grafo.modulo = mBits;
+
             System.out.println("grafoHandler.porta["+grafo.selfNo+"] = " + grafo.selfPorta);
             processor = new Operacoes.Processor(grafo);
             TServerTransport serverTransport = new TServerSocket(port);

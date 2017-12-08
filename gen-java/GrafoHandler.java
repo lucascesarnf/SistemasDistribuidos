@@ -30,25 +30,86 @@ public class GrafoHandler implements Operacoes.Iface{
     
     private int[] clients = {9090, 8129, 9092, 8978, 9056};
     
-    public int selfPorta;
-    public int selfIndex;//Para fins de controle do arquivo de configuração
+    public int[][] ft;
+
     public int selfNo;
-    public int[][] FT;
+
+    public int selfIndex;
+
+    public boolean souResponsavel = false;
+
+    public boolean proximoResponsavel = false;
+
+    public int selfPorta;
     
+    public int modulo;
+
     private Grafo grafo = new Grafo(new ArrayList<Vertice>(), new ArrayList<Aresta>());
+
+
+    private int findResponsible(int i) {
+        System.out.println("********** Encontrar Responsável **********");
+        byte[] theDigest = null;
+        System.out.println("Encontrar responsável para:"+ i);
+        try{
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            theDigest = md.digest( Integer.toString(i).getBytes("UTF-8") );
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        double k = abs(theDigest[theDigest.length-1] % Math.pow(2,modulo));
+        
+        System.out.println("O k é:"+ k);
+         if(souResponsavel)
+            return -1;
+
+        if(selfNo > ft[0][0] && ((k > selfNo) || (k < ft[0][0]))){
+            proximoResponsavel = true;
+            return 0;
+        }
+
+        if(k > selfNo && k < ft[0][0]){
+            proximoResponsavel = true;
+            return 0;
+        }
+        
+        for(int j = 0; j < ft.length - 1; j++){
+            if(ft[j][0]<= k && k < ft[j+1][0]){
+                proximoResponsavel = false;
+                return j;
+            }
+        }
+
+        proximoResponsavel = false;
+        return 0;
+
+    }
     
+
+    @Override
+    public boolean setaResponsavel(int responsavel){
+        if(responsavel == 1){
+            souResponsavel = true;
+        }
+        else{
+            souResponsavel = false;
+        }
+        return false;
+    }
+
     //Adicionar Vertice a Lista Grafo.Vertices[]
     @Override
     public boolean novoVertice(int nome,int cor, double peso, String descricao)
     {
         System.out.println("############## Adicionar Vertice #################");
         int index = findResponsible(nome);
-        int porta = clients[index];
-        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+       
         
-        if(selfPorta != porta){
+        if(!souResponsavel && index != -1){
             System.out.println("Eu NÃO SOU o responsável");
-            
+            int porta = ft[index][1];
+
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
             TTransport transport = new TSocket("localHost",porta);
             try{
                 transport.open();
@@ -57,6 +118,11 @@ public class GrafoHandler implements Operacoes.Iface{
                 System.out.println("Passei pra frente");
                 System.out.println(imprimeVertices());
                 System.out.println("Agora é esperar...");
+                if(proximoResponsavel)
+                    client.setaResponsavel(1);
+                else{
+                    client.setaResponsavel(0);
+                }
                 boolean retorno = client.novoVertice(nome, cor, peso, descricao);
                 transport.close();
                 System.out.println("#############################################");
@@ -646,23 +712,7 @@ public class GrafoHandler implements Operacoes.Iface{
         }
         return null;
     }
-    
-    private int findResponsible(int i) {
-        System.out.println("********** Encontrar Responsável **********");
-        byte[] theDigest = null;
-        System.out.println("Encontrar responsável para:"+ i);
-        try{
-            MessageDigest md = MessageDigest.getInstance("SHA-1");
-            theDigest = md.digest( Integer.toString(i).getBytes("UTF-8") );
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        int responsavel = abs(theDigest[theDigest.length-1] % this.clients.length);
-        
-        System.out.println("O responsável é:"+ responsavel);
-        
-        return abs(theDigest[theDigest.length-1] % this.clients.length);
-    }
+
     
     @Override
     public String imprimeTodosVertices()
