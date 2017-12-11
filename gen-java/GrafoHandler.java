@@ -58,21 +58,32 @@ public class GrafoHandler implements Operacoes.Iface{
             e.printStackTrace();
         }
         double k = abs(theDigest[theDigest.length-1] % Math.pow(2,modulo));
+        //double k = abs(i % Math.pow(2,modulo));
         
         System.out.println("O k é:"+ k);
+         
+
+         if(k == selfNo){
+            souResponsavel = true;
+            return -1;
+         }
+
          if(souResponsavel)
             return -1;
 
+        // Se o no é o ultimo. E primeiro é respónsavel
         if(selfNo > ft[0][0] && ((k > selfNo) || (k < ft[0][0]))){
             proximoResponsavel = true;
             return 0;
         }
 
-        if(k > selfNo && k < ft[0][0]){
+        // Se k maior que eu mesmo e menor que proximo, proximo é responsavel
+        if(k > selfNo && k <= ft[0][0]){
             proximoResponsavel = true;
             return 0;
         }
         
+        // oercorre a finger table e aplica formula do
         for(int j = 0; j < ft.length - 1; j++){
             if(ft[j][0]<= k && k < ft[j+1][0]){
                 proximoResponsavel = false;
@@ -174,23 +185,28 @@ public class GrafoHandler implements Operacoes.Iface{
             return false;
         }
         
-        int index = findResponsible(v1+v2);
-        int porta = clients[index];
-        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+         int index = findResponsible(nome);
+       
         
-        if(selfPorta != porta){
+        if(!souResponsavel && index != -1){
             System.out.println("Eu NÃO SOU o responsável");
-            
+            int porta = ft[index][1];
+
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
             TTransport transport = new TSocket("localHost",porta);
             try{
                 transport.open();
                 TProtocol protocol = new  TBinaryProtocol(transport);
                 Operacoes.Client client = new Operacoes.Client(protocol);
                 System.out.println("Passei pra frente");
-                System.out.println(imprimeArestas());
+                System.out.println(imprimeVertices());
                 System.out.println("Agora é esperar...");
-                boolean retorno = client.novaAresta(v1,v2,peso,flag,descricao);
-                System.out.println(imprimeArestas());
+                if(proximoResponsavel)
+                    client.setaResponsavel(1);
+                else{
+                    client.setaResponsavel(0);
+                }
+                boolean retorno = client.novaAresta(v1,v2, peso, flag, descricao);
                 transport.close();
                 System.out.println("#############################################");
                 return retorno;
@@ -279,12 +295,13 @@ public class GrafoHandler implements Operacoes.Iface{
         System.out.println("############## Remove Vertice #################");
         
         int index = findResponsible(nome);
-        int porta = clients[index];
-        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+       
         
-        if(selfPorta != porta){
+        if(!souResponsavel && index != -1){
             System.out.println("Eu NÃO SOU o responsável");
-            
+            int porta = ft[index][1];
+
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
             TTransport transport = new TSocket("localHost",porta);
             try{
                 transport.open();
@@ -293,6 +310,11 @@ public class GrafoHandler implements Operacoes.Iface{
                 System.out.println("Passei pra frente");
                 System.out.println(imprimeVertices());
                 System.out.println("Agora é esperar...");
+                if(proximoResponsavel)
+                    client.setaResponsavel(1);
+                else{
+                    client.setaResponsavel(0);
+                }
                 boolean retorno = client.removeVertice(nome);
                 transport.close();
                 System.out.println("#############################################");
@@ -352,20 +374,27 @@ public class GrafoHandler implements Operacoes.Iface{
     public boolean removeAresta(int v1,int v2)
     {
         System.out.println("############## Remove Aresta #################");
-        int index = findResponsible(v1+v2);
-        int porta = clients[index];
-        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        int index = findResponsible(nome);
+       
         
-        if(selfPorta != porta){
+        if(!souResponsavel && index != -1){
             System.out.println("Eu NÃO SOU o responsável");
+            int porta = ft[index][1];
+
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
             TTransport transport = new TSocket("localHost",porta);
             try{
                 transport.open();
                 TProtocol protocol = new  TBinaryProtocol(transport);
                 Operacoes.Client client = new Operacoes.Client(protocol);
                 System.out.println("Passei pra frente");
-                System.out.println(imprimeArestas());
+                System.out.println(imprimeVertices());
                 System.out.println("Agora é esperar...");
+                if(proximoResponsavel)
+                    client.setaResponsavel(1);
+                else{
+                    client.setaResponsavel(0);
+                }
                 boolean retorno = client.removeAresta(v1,v2);
                 transport.close();
                 System.out.println("#############################################");
@@ -402,12 +431,13 @@ public class GrafoHandler implements Operacoes.Iface{
     {
         System.out.println("############## Update Vertice #################");
         int index = findResponsible(nome);
-        int porta = clients[index];
-        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+       
         
-        if(selfPorta != porta){
+        if(!souResponsavel && index != -1){
             System.out.println("Eu NÃO SOU o responsável");
-            
+            int porta = ft[index][1];
+
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
             TTransport transport = new TSocket("localHost",porta);
             try{
                 transport.open();
@@ -416,6 +446,11 @@ public class GrafoHandler implements Operacoes.Iface{
                 System.out.println("Passei pra frente");
                 System.out.println(imprimeVertices());
                 System.out.println("Agora é esperar...");
+                if(proximoResponsavel)
+                    client.setaResponsavel(1);
+                else{
+                    client.setaResponsavel(0);
+                }
                 boolean retorno = client.updateVertice(v,nome);
                 transport.close();
                 System.out.println("#############################################");
@@ -455,21 +490,28 @@ public class GrafoHandler implements Operacoes.Iface{
     public boolean updateAresta(Aresta a,int v1,int v2)
     {
         System.out.println("############## Update Aresta #################");
-        int index = findResponsible(v1+v2);
-        int porta = clients[index];
-        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        int index = findResponsible(nome);
+       
         
-        if(selfPorta != porta){
+        if(!souResponsavel && index != -1){
             System.out.println("Eu NÃO SOU o responsável");
+            int porta = ft[index][1];
+
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
             TTransport transport = new TSocket("localHost",porta);
             try{
                 transport.open();
                 TProtocol protocol = new  TBinaryProtocol(transport);
                 Operacoes.Client client = new Operacoes.Client(protocol);
                 System.out.println("Passei pra frente");
-                System.out.println(imprimeArestas());
+                System.out.println(imprimeVertices());
                 System.out.println("Agora é esperar...");
-                boolean retorno = client.updateAresta(a,v1,v2);
+                if(proximoResponsavel)
+                    client.setaResponsavel(1);
+                else{
+                    client.setaResponsavel(0);
+                }
+                boolean retorno = client.updateAresta(a,v1);
                 transport.close();
                 System.out.println("#############################################");
                 return retorno;
@@ -628,13 +670,14 @@ public class GrafoHandler implements Operacoes.Iface{
     @Override
     public Vertice retornaVertice(int nome){
         Vertice retorno;
-        int index = findResponsible(nome);
-        int porta = clients[index];
-        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        iint index = findResponsible(nome);
+       
         
-        if(selfPorta != porta){
+        if(!souResponsavel && index != -1){
             System.out.println("Eu NÃO SOU o responsável");
-            
+            int porta = ft[index][1];
+
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
             TTransport transport = new TSocket("localHost",porta);
             try{
                 transport.open();
@@ -643,14 +686,19 @@ public class GrafoHandler implements Operacoes.Iface{
                 System.out.println("Passei pra frente");
                 System.out.println(imprimeVertices());
                 System.out.println("Agora é esperar...");
-                retorno = client.retornaVertice(nome);
+                if(proximoResponsavel)
+                    client.setaResponsavel(1);
+                else{
+                    client.setaResponsavel(0);
+                }
+                boolean retorno = client.retornaVertice(nome);
                 transport.close();
+                System.out.println("#############################################");
                 return retorno;
             }catch (Exception x) {
                 x.printStackTrace();
             }
-        }
-        else
+        }else{
         {
             System.out.println("Eu SOU o responsável");
             synchronized(grafo.getVertices()){
@@ -673,13 +721,14 @@ public class GrafoHandler implements Operacoes.Iface{
     @Override
     public Aresta retornaAresta(int v1,int v2){
         Aresta retorno;
-        int index = findResponsible(v1+v2);
-        int porta = clients[index];
-        System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
+        int index = findResponsible(nome);
+       
         
-        if(selfPorta != porta){
+        if(!souResponsavel && index != -1){
             System.out.println("Eu NÃO SOU o responsável");
-            
+            int porta = ft[index][1];
+
+            System.out.println("Eu sou o ["+selfPorta+"] e o responsável é["+index+"]:"+porta);
             TTransport transport = new TSocket("localHost",porta);
             try{
                 transport.open();
@@ -688,15 +737,19 @@ public class GrafoHandler implements Operacoes.Iface{
                 System.out.println("Passei pra frente");
                 System.out.println(imprimeVertices());
                 System.out.println("Agora é esperar...");
-                retorno = client.retornaAresta(v1,v2);
+                if(proximoResponsavel)
+                    client.setaResponsavel(1);
+                else{
+                    client.setaResponsavel(0);
+                }
+                boolean retorno = client.retornaAresta(v1,v2);
                 transport.close();
+                System.out.println("#############################################");
                 return retorno;
             }catch (Exception x) {
                 x.printStackTrace();
             }
-        }
-        else
-        {
+        }else{
             synchronized(grafo.getArestas()){
                 if (grafo.getArestas() != null)
                 {
